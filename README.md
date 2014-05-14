@@ -32,11 +32,11 @@ The redisio cookbook contains an LWRP for installing and uninstalling redis. It 
 
 The install recipe will build, compile, install and configure redis as well as setup service resources for it.  These resources will be named for the port of the redis server, unless a "name" attribute was specified.  Example names would be: service["redis6379"] or service["redismaster"] if the name attribute was "master"
 
-The most common use case for the redisio cookbook is to use the install recipe followed by the enable recipe.  
+The most common use case for the redisio cookbook is to use the install recipe followed by the enable recipe.
 
-Another common use case is to use the install recipe, and then call the service resources created by it from another cookbook.  
+Another common use case is to use the install recipe, and then call the service resources created by it from another cookbook.
 
-It is important to note that changing the configuration options of redis does not make them take effect on the next chef run.  Due to how redis works, you cannot reload a configuration without restarting the redis service.  Redis does not offer a reload option, in order to have new options be used redis must be stopped and started. 
+It is important to note that changing the configuration options of redis does not make them take effect on the next chef run.  Due to how redis works, you cannot reload a configuration without restarting the redis service.  Redis does not offer a reload option, in order to have new options be used redis must be stopped and started.
 
 You should make sure to set the ulimit for the user you want to run redis as to be higher than the max connections you allow.
 
@@ -44,7 +44,7 @@ The disable recipe just stops redis and removes it from run levels.
 
 The uninstall recipe, and LWRP are used to remove the configuration files and redis binaries.  This is not commonly used and may be removed in future releases.
 
-The cookbook also contains a recipe to allow for the installation of the redis ruby gem. 
+The cookbook also contains a recipe to allow for the installation of the redis ruby gem.
 
 Recipes
 -------
@@ -117,6 +117,22 @@ default_attributes({
   'redisio' => {
     'default_settings' => {'datadir' => '/mnt/redis'},
     'servers' => [{'port' => '6379'}, {'port' => '6380', 'name' => "MyInstance"}]
+  }
+})
+```
+
+#### Install redis and setup 31 instances, on the same server, on different ports, with CPU affinity set to an individual CPU on a 32 core machine
+
+```ruby
+run_list *%w[
+  recipe[redisio::install]
+  recipe[redisio::enable]
+]
+
+default_attributes({
+  'redisio' => {
+    'default_settings' => {'datadir' => '/mnt/redis'},
+    'servers' => (0..30).map{|i|  {port: (6379+i).to_s, bind_cpu: i.to_s} }
   }
 })
 ```
@@ -222,7 +238,7 @@ service resource
 ----------------
 
 The install recipe sets up a service resource for each redis instance.  In the past there was a custom service LWRP called "redisio_service".  This is deprecated and should no longer be used.
-I have left the resource available so as to not break it for anybody who happens to be calling it themselves from other cookbooks. 
+I have left the resource available so as to not break it for anybody who happens to be calling it themselves from other cookbooks.
 
 The service resources created will use the 'name' attribute if it is specified, and will default to the port as it's name if no name is given.
 
@@ -266,7 +282,7 @@ Available options and their defaults
 ```
 'user'                   => 'redis' - the user to own the redis datadir, redis will also run under this user
 'group'                  => 'redis' - the group to own the redis datadir
-'homedir'                => Home directory of the user. Varies on distribution, check attributes file 
+'homedir'                => Home directory of the user. Varies on distribution, check attributes file
 'shell'                  => Users shell. Varies on distribution, check attributes file
 'systemuser'             => true - Sets up the instances user as a system user
 'ulimit'                 => 0 - 0 is a special value causing the ulimit to be maxconnections +32.  Set to nil or false to disable setting ulimits
@@ -283,7 +299,7 @@ Available options and their defaults
 'logfile'                => nil,
 'syslogenabled'         => 'yes',
 'syslogfacility         => 'local0',
-'save'                   => nil, - This attribute is nil but defaults to ['900 1','300 10','60 10000'], if you want to disable saving use an empty string 
+'save'                   => nil, - This attribute is nil but defaults to ['900 1','300 10','60 10000'], if you want to disable saving use an empty string
 'slaveof'                => nil,
 'job_control'            => 'initd', - options are 'initd' and 'upstart'
 'masterauth'             => nil,
@@ -309,7 +325,7 @@ Available options and their defaults
 
 The redis_gem recipe  will also allow you to install the redis ruby gem, these are attributes related to that, and are in the redis_gem attributes file.
 
-* `redisio['gem']['name']` - the name of the gem to install, defaults to 'redis'  
+* `redisio['gem']['name']` - the name of the gem to install, defaults to 'redis'
 * `redisio['gem']['version']` -  the version of the gem to install.  if it is nil, the latest available version will be installed.
 
 Resources/Providers
