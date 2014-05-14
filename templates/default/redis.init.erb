@@ -20,7 +20,11 @@ REDISNAME=<%= @name %>
 REDISPORT=<%= @port %>
 <% case @platform %>
 <% when 'ubuntu','debian','fedora' %>
+  <% if not @bind_cpu.nil? %>
+EXEC="sudo -u <%= @user %> /usr/bin/taskset -c <%= @bind_cpu %> <%= File.join(@bin_path, 'redis-server') %> <%= @configdir %>/${REDISNAME}.conf"
+  <% else %>
 EXEC="sudo -u <%= @user %> <%= File.join(@bin_path, 'redis-server') %> <%= @configdir %>/${REDISNAME}.conf"
+  <% end %>
 <% else %>
 EXEC="/sbin/runuser <%= @user %> -c \"<%= File.join(@bin_path, 'redis-server') %> <%= @configdir %>/${REDISNAME}.conf\""
 <% end %>

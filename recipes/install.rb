@@ -40,7 +40,7 @@ end
 # Create a service resource for each redis instance, named for the port it runs on.
 redis_instances.each do |current_server|
   server_name = current_server['name'] || current_server['port']
-  job_control = current_server['job_control'] || redis['default_settings']['job_control'] 
+  job_control = current_server['job_control'] || redis['default_settings']['job_control']
 
   if job_control == 'initd'
   	service "redis#{server_name}" do
@@ -65,5 +65,5 @@ redis_instances.each do |current_server|
 
 end
 
-node.set['redisio']['servers'] = redis_instances 
+node.set['redisio']['servers'] = redis_instances
 
